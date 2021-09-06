@@ -1,24 +1,66 @@
-import logo from './logo.svg';
-import './App.css';
+import axios from "axios";
+import { useState, useEffect } from "react";
+import Header from "./components/Header";
+import Button from "./components/Button";
+import Image from "./components/Image";
+import styled from 'styled-components';
+
+const StyledApp = styled.div`
+  box-sizing: border-box;
+  width: 300px;
+  height: 400px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%);
+  box-shadow: 0 0 10px rgb(0 0 0 / 10%);
+  padding: 30px;
+  overflow: hidden;
+`
 
 function App() {
+  const [cats, setCats] = useState();
+  const [inputName, setInputName] = useState("enadled");
+
+  const onChangeRadio = (name) => {
+    setInputName(name);
+  };
+
+  const getCatButton = () => {
+    axios
+      .get(
+        "https://api.thecatapi.com/v1/images/search?api_key=7ffd60e3-5546-4757-939c-b2b1b421d95c"
+      )
+      .then(({ data }) => setCats(data));
+  };
+
+  useEffect(() => {
+    axios
+      .get(
+        "https://api.thecatapi.com/v1/images/search?api_key=7ffd60e3-5546-4757-939c-b2b1b421d95c"
+      )
+      .then(({ data }) => setCats(data));
+  }, []);
+
+  useEffect(() => {
+    if (inputName === "autoRefrash") {
+      const interval = setInterval(() => {
+        axios
+          .get(
+            "https://api.thecatapi.com/v1/images/search?api_key=7ffd60e3-5546-4757-939c-b2b1b421d95c"
+          )
+          .then(({ data }) => setCats(data));
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  });
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <StyledApp>
+      <Header name={inputName} onChange={onChangeRadio} />
+      <Button getCat={getCatButton} />
+      {cats && <Image url={cats[0].url} />}
+    </StyledApp>
   );
 }
 
